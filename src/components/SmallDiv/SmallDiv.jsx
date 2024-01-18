@@ -1,20 +1,20 @@
-import React from 'react'
-import { useState } from 'react';
+import React, { useEffect } from 'react'
+import { useState, useRef } from 'react';
 import './smalldiv.css'
 
 const SmallDiv = ({isDragging, 
                 setIsDragging, 
-                setPosition, 
-                position,
+                // setPosition, 
+                // position,
                 tooltipVisible,
                 setTooltipVisible,
                 setTooltipPosition,
                 tooltipPosition,
-                smallDivRef}) => {
-    // const [position, setPosition] = useState({ x: 0, y: 0 });
-    // const [tooltipPosition, setTooltipPosition] = useState({x:0, y:0})
-    // const [tooltipVisible, setTooltipVisible] = useState(false)
-
+                largeDivRef}) => {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    // const [tooltipPosition, setTooltipPosition] = useState({x: 0, y:0})
+    
+    const smallDivRef = useRef(null)
     const handleMouseDown = (e) => {
       setIsDragging(true);
       setTooltipVisible(false)
@@ -22,6 +22,7 @@ const SmallDiv = ({isDragging,
   
     const handleMouseMove = (e) => {
       if (isDragging) {
+        setTooltipVisible(false)
         const newX = position.x + e.movementX;
         const newY = position.y + e.movementY;
         const maxX = 250
@@ -34,21 +35,25 @@ const SmallDiv = ({isDragging,
   
     const handleMouseUp = (e) => {
       setIsDragging(false);
-      setTooltipVisible(true)
+      let smallDivY = smallDivRef.current?.getBoundingClientRect().bottom
+      let smallDivX = smallDivRef.current?.getBoundingClientRect().left
+      let largeDivX = largeDivRef.current?.getBoundingClientRect().right
+      let largeDivY = largeDivRef.current?.getBoundingClientRect().bottom
       setTooltipPosition({
-        x: e.clientX,
-        y: e.clientY + 30
-    })
+        x: Math.min(smallDivX, largeDivX-150),
+        y: smallDivY + 30 >= largeDivY ? smallDivY - 80 : smallDivY 
+      })
+      setTooltipVisible(true)
     };
     const handleMouseEnter = (e) => {
+      let smallDivY = smallDivRef.current?.getBoundingClientRect().bottom
+      let smallDivX = smallDivRef.current?.getBoundingClientRect().left
+      let largeDivX = largeDivRef.current?.getBoundingClientRect().right
+      let largeDivY = largeDivRef.current?.getBoundingClientRect().bottom
         setTooltipVisible(true)
-        const maxToolPosX = 200
-        const maxToolPosY = 200
-        const newX = e.clientX;
-        const newY = e.clientY + 30;
         setTooltipPosition({
-            x: newX,
-            y: newY
+          x: Math.min(smallDivX, largeDivX-150),
+          y: smallDivY + 30 >= largeDivY ? smallDivY - 80 : smallDivY 
         })
     }
     const handleMouseLeave = (e) => {
@@ -56,7 +61,8 @@ const SmallDiv = ({isDragging,
         setTooltipVisible(false)
     }
   return (
-    <div id="large-div" onMouseDown={handleMouseDown} 
+    <div id="large-div" ref={smallDivRef}
+      onMouseDown={handleMouseDown} 
         onMouseMove={handleMouseMove} 
         onMouseUp={handleMouseUp} 
         onMouseEnter={handleMouseEnter}
