@@ -1,3 +1,9 @@
+.main-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
 .large-div {
     position: relative;
     width: 300px;
@@ -5,7 +11,23 @@
     background-color: lightgray;
     overflow: hidden;
     border: .5px solid black;
-  }
-  .tooltip {
+    display: flex;
+    justify-content: space-between;
+}
+.tooltip {
     
-  }
+}
+.select-options {
+  margin: 25px;
+  height: 30px;
+  width: 150px;
+  border: .5px solid black;
+}
+.large-div-drag {
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  border: .5px solid black;
+  top: 0;
+  margin-left: 250;
+}
