@@ -20,6 +20,7 @@ const LargeDiv = () => {
   const [largeDivDimensions, setLargeDivDimensions] = useState({height: 300, width: 300})
   const [isResizing, setIsResizing] = useState({resize:false, direction:""})
   const [options, setOptions] = useState("")
+  const [cursor, setCursor] = useState("")
   const largeDivRef = useRef(null)
   const smallDivRef = useRef(null)
 
@@ -27,7 +28,8 @@ const LargeDiv = () => {
     left: largeDivPos.x,
     top: largeDivPos.y,
     height: largeDivDimensions.height,
-    width: largeDivDimensions.width
+    width: largeDivDimensions.width,
+    cursor: cursor
   }
   const tooltipStyle = {
     visibility: tooltipVisible ? "visible" : "hidden",
@@ -72,18 +74,122 @@ const LargeDiv = () => {
       const boundY = Math.max(0, Math.min(newY, maxY))  
       setPosition({ x: boundX, y: boundY });
     }
+    if(((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
+      ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
+      ((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) ||
+      ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5))) {
+        setCursor("move")
+      }
+    else if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) || 
+      (e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5)) {
+        setCursor("col-resize")
+    }
+    else if((e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5) || 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) {
+        setCursor("row-resize")
+    }
+    else setCursor("")
     if(isResizing.resize === true) {
+      if(isResizing.direction === "left-top") {
+        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
+          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+          setPosition({
+            x: Math.max(0,position.x-e.movementX),
+            y: Math.max(0,position.y-e.movementY)
+          })
+        }
+        setLargeDivDimensions(
+          {
+            width: Math.max(smallDivWidth, largeDivDimensions.width - e.movementX),
+            height: Math.max(smallDivWidth, largeDivDimensions.height - e.movementY)
+          }
+        )
+        if((largeDivDimensions.width > smallDivWidth) ||
+            (largeDivDimensions.height > smallDivWidth)){
+          setLargeDivPos({
+            x: largeDivPos.x+e.movementX,
+            y: largeDivPos.y+e.movementY
+          })
+        }
+      }
+      if(isResizing.direction === "right-top") {
+        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
+          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+          setPosition({
+            x: Math.max(0,position.x+e.movementX),
+            y: Math.max(0,position.y-e.movementY)
+          })
+        }
+        setLargeDivDimensions(
+          {
+            width: Math.max(smallDivWidth, largeDivDimensions.width + e.movementX),
+            height: Math.max(smallDivWidth, largeDivDimensions.height - e.movementY)
+          }
+        )
+        if(largeDivDimensions.height > smallDivWidth){
+          setLargeDivPos({
+            x: largeDivPos.x,
+            y: largeDivPos.y+e.movementY
+          })
+        }
+      }
+      if(isResizing.direction === "left-bottom") {
+        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
+          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+          setPosition({
+            x: Math.max(0,position.x-e.movementX),
+            y: Math.max(0,position.y+e.movementY)
+          })
+        }
+        setLargeDivDimensions(
+          {
+            width: Math.max(smallDivWidth, largeDivDimensions.width - e.movementX),
+            height: Math.max(smallDivWidth, largeDivDimensions.height + e.movementY)
+          }
+        )
+        if(largeDivDimensions.width > smallDivWidth){
+          setLargeDivPos({
+            x: largeDivPos.x+e.movementX,
+            y: largeDivPos.y
+          })
+        }
+      }
+      if(isResizing.direction === "right-bottom") {
+        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
+          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+          setPosition({
+            x: Math.max(0, position.x+e.movementX),
+            y: Math.max(0,position.y+e.movementY)
+          })
+        }
+        setLargeDivDimensions(
+          {
+            width: Math.max(smallDivWidth, largeDivDimensions.width + e.movementX),
+            height: Math.max(smallDivWidth, largeDivDimensions.height + e.movementY)
+          }
+        )
+      }
       if(isResizing.direction === "left") {
         if(position.x+smallDivWidth >= largeDivDimensions.width) {
           setPosition(prevItem => ({
             ...prevItem,
             x: Math.max(0,prevItem.x-e.movementX)
-          }))
-        }
-        if(largeDivDimensions.width > smallDivWidth) {
-          setLargeDivPos(prevItem => ({
-            ...prevItem,
-            x: prevItem.x+e.movementX
           }))
         }
         setLargeDivDimensions(prevItem => (
@@ -92,6 +198,12 @@ const LargeDiv = () => {
             width: Math.max(smallDivWidth, prevItem.width - e.movementX)
           }
         ))
+        if(largeDivDimensions.width > smallDivWidth) {
+          setLargeDivPos(prevItem => ({
+            ...prevItem,
+            x: prevItem.x+e.movementX
+          }))
+        }
       }
       if(isResizing.direction === "right") {
         if(position.x+smallDivWidth >= largeDivDimensions.width) {
@@ -150,33 +262,78 @@ const LargeDiv = () => {
     if(isDragging) {
       setIsDragging(false)
     }
-    if(e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+    console.log(isResizing)
+    if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) {
+      setIsResizing({
+        resize: true,
+        direction: "left-top"
+      })
+      // setCursor("move")
+    }
+    else if((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) {
+      setIsResizing({
+        resize: true,
+        direction: "right-top"
+      })
+      // setCursor("move")
+    }
+    else if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) {
+      setIsResizing({
+        resize: true,
+        direction: "left-bottom"
+      })
+      // setCursor("move")
+    }
+    else if((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) {
+      setIsResizing({
+        resize: true,
+        direction: "right-bottom"
+      })
+      // setCursor("move")
+    }
+    else if(e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) {
       setIsResizing({
         resize: true,
         direction: "left"
       })
+      // setCursor("col-resize")
     }
-    if(e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+    else if(e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) {
       setIsResizing({
         resize: true,
         direction: "right"
       })
+      // setCursor("col-resize")
     }
-    if(e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+    else if(e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
       e.clientY <= largeDivRef.current.getBoundingClientRect().top+5) {
       setIsResizing({
         resize: true,
         direction: "top"
       })
+      // setCursor("row-resize")
     }
-    if(e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+    else if(e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
       e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5) {
       setIsResizing({
         resize: true,
         direction: "bottom"
       })
+      // setCursor("row-resize")
     }
   }
   function handleMainDivMouseUp() { 
@@ -188,12 +345,15 @@ const LargeDiv = () => {
       resize: false,
       direction: ""
     })
+    setCursor("")
   }
+  
   return (
     <div className="main-div" 
          onMouseMove={handleMainDivMouseMove} 
          onMouseDown={handleMainDivMouseDown}
          onMouseUp={handleMainDivMouseUp}>
+          {console.log(isResizing)}
       <select className="select-options" value={options} style={optionsStyle} onChange={handleOptionChange}>
         <option value="">Select Direction</option>
         <option value="top">Top</option>
