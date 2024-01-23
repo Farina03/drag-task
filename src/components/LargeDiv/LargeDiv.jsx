@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import SmallDiv from '../SmallDiv/SmallDiv'
 import './largediv.css'
 import { createPortal } from 'react-dom';
+// import '../SmallDiv/smalldiv.css'
 
 const LargeDiv = () => {
   const largeDivWidth = 300  
@@ -107,8 +108,8 @@ const LargeDiv = () => {
     else setCursor("")
     if(isResizing.resize === true) {
       if(isResizing.direction === "left-top") {
-        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
-          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+        if((position.x+smallDivWidth <= largeDivDimensions.width) || 
+          (position.y+smallDivWidth <= largeDivDimensions.height)) {
           setPosition({
             x: Math.max(0,position.x-e.movementX),
             y: Math.max(0,position.y-e.movementY)
@@ -130,9 +131,9 @@ const LargeDiv = () => {
       }
       if(isResizing.direction === "right-top") {
         if((position.x+smallDivWidth >= largeDivDimensions.width) || 
-          (position.y+smallDivWidth >= largeDivDimensions.height)) {
+          (position.y+smallDivWidth <= largeDivDimensions.height)) {
           setPosition({
-            x: Math.max(0,position.x+e.movementX),
+            x: Math.max(0, Math.min(position.x, position.x+e.movementX)),        //x: Math.max(0,position.x+e.movementX),
             y: Math.max(0,position.y-e.movementY)
           })
         }
@@ -150,11 +151,11 @@ const LargeDiv = () => {
         }
       }
       if(isResizing.direction === "left-bottom") {
-        if((position.x+smallDivWidth >= largeDivDimensions.width) || 
+        if((position.x+smallDivWidth <= largeDivDimensions.width) || 
           (position.y+smallDivWidth >= largeDivDimensions.height)) {
           setPosition({
-            x: Math.max(0,position.x-e.movementX),
-            y: Math.max(0,position.y+e.movementY)
+            x: Math.max(0,position.x-e.movementX),       //x: Math.max(0,position.x-e.movementX),
+            y: Math.max(0, Math.min(position.y,position.y+e.movementY))  //y: Math.max(0,position.y+e.movementY)
           })
         }
         setLargeDivDimensions(
@@ -174,8 +175,8 @@ const LargeDiv = () => {
         if((position.x+smallDivWidth >= largeDivDimensions.width) || 
           (position.y+smallDivWidth >= largeDivDimensions.height)) {
           setPosition({
-            x: Math.max(0, position.x+e.movementX),
-            y: Math.max(0,position.y+e.movementY)
+            x: Math.max(0, Math.min(position.x, position.x+e.movementX)),     //x: Math.min(0, Math.max(0, position.x+e.movementX)),
+            y: Math.max(0, Math.min(position.y,position.y+e.movementY))    //y: Math.min(0, Math.max(0,position.y+e.movementY))
           })
         }
         setLargeDivDimensions(
@@ -186,22 +187,26 @@ const LargeDiv = () => {
         )
       }
       if(isResizing.direction === "left") {
-        if(position.x+smallDivWidth >= largeDivDimensions.width) {
+        console.log({ movementX:e.movementX})
+        // if(position.x+smallDivWidth <= largeDivDimensions.width) {
           setPosition(prevItem => ({
             ...prevItem,
             x: Math.max(0,prevItem.x-e.movementX)
           }))
-        }
+        // }
         setLargeDivDimensions(prevItem => (
           {
             ...prevItem,
             width: Math.max(smallDivWidth, prevItem.width - e.movementX)
           }
         ))
-        if(largeDivDimensions.width > smallDivWidth) {
+        if(largeDivDimensions.width > smallDivWidth) {  ///edit
+
+          let movex = e.movementX;
+
           setLargeDivPos(prevItem => ({
             ...prevItem,
-            x: prevItem.x+e.movementX
+            x: prevItem.x+movex
           }))
         }
       }
@@ -209,7 +214,7 @@ const LargeDiv = () => {
         if(position.x+smallDivWidth >= largeDivDimensions.width) {
           setPosition(prevItem => ({
             ...prevItem,
-            x: Math.max(0, prevItem.x+e.movementX)
+            x: Math.max(0, Math.min(prevItem.x, prevItem.x+e.movementX))
           }))
         }
         setLargeDivDimensions(prevItem => (
@@ -220,16 +225,34 @@ const LargeDiv = () => {
         ))
       }
       if(isResizing.direction === "top") {
-        if(position.y+smallDivWidth >= largeDivDimensions.height) {
+        const LargeBottom = largeDivRef.current.getBoundingClientRect().bottom
+        const largeTop = largeDivRef.current.getBoundingClientRect().top
+        const smallTop = smallDivRef.current.getBoundingClientRect().top
+        const smallBottom = smallDivRef.current.getBoundingClientRect().bottom
+        console.log(e.movementY)
+        // if(Math.ceil(smallTop) >= largeTop) {
           setPosition(prevItem => ({
             ...prevItem,
-            y: Math.max(0,prevItem.y-e.movementY)
+            y: Math.max(0, prevItem.y-e.movementY)
           }))
-        }
+        // }
+        
+        // if(position.y+smallDivWidth < largeDivDimensions.height) {
+        //   setPosition(prevItem => ({
+        //     ...prevItem,
+        //     y: Math.max(0,prevItem.y-e.movementY)
+        //   }))
+        // }
+        // if(Math.ceil(smallBottom) <= LargeBottom) {
+        //   setLargeDivPos(prevItem => ({
+        //     ...prevItem,
+        //     y: largeDivPos.y+e.movementY 
+        //   }))
+        // }
         if(largeDivDimensions.height > smallDivWidth) {
           setLargeDivPos(prevItem => ({
             ...prevItem,
-            y: largeDivPos.y+e.movementY
+            y: largeDivPos.y+e.movementY 
           }))
         }
         setLargeDivDimensions(prevItem => (
@@ -243,7 +266,7 @@ const LargeDiv = () => {
         if(position.y+smallDivWidth >= largeDivDimensions.height) {
           setPosition(prevItem => ({
             ...prevItem,
-            y: Math.max(0,prevItem.y+e.movementY)
+            y: Math.max(0, Math.min(prevItem.y,prevItem.y+e.movementY))    //max -> 0,prevItem.y+e.movementY
           }))
         }
         setLargeDivDimensions(prevItem => (
@@ -271,7 +294,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "left-top"
       })
-      // setCursor("move")
     }
     else if((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
@@ -281,7 +303,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "right-top"
       })
-      // setCursor("move")
     }
     else if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
@@ -291,7 +312,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "left-bottom"
       })
-      // setCursor("move")
     }
     else if((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
@@ -301,7 +321,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "right-bottom"
       })
-      // setCursor("move")
     }
     else if(e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) {
@@ -309,7 +328,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "left"
       })
-      // setCursor("col-resize")
     }
     else if(e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
       e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) {
@@ -317,7 +335,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "right"
       })
-      // setCursor("col-resize")
     }
     else if(e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
       e.clientY <= largeDivRef.current.getBoundingClientRect().top+5) {
@@ -325,7 +342,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "top"
       })
-      // setCursor("row-resize")
     }
     else if(e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
       e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5) {
@@ -333,7 +349,6 @@ const LargeDiv = () => {
         resize: true,
         direction: "bottom"
       })
-      // setCursor("row-resize")
     }
   }
   function handleMainDivMouseUp() { 
@@ -353,7 +368,6 @@ const LargeDiv = () => {
          onMouseMove={handleMainDivMouseMove} 
          onMouseDown={handleMainDivMouseDown}
          onMouseUp={handleMainDivMouseUp}>
-          {console.log(isResizing)}
       <select className="select-options" value={options} style={optionsStyle} onChange={handleOptionChange}>
         <option value="">Select Direction</option>
         <option value="top">Top</option>
@@ -371,7 +385,7 @@ const LargeDiv = () => {
             <div className='tooltip' style={tooltipStyle}>This is tooltip</div>, document.body
         )}
         <div ref={smallDivRef}>
-        <SmallDiv isDragging={isDragging} 
+          <SmallDiv isDragging={isDragging} 
                 setIsDragging={setIsDragging}
                 tooltipVisible={tooltipVisible}
                 setTooltipVisible={setTooltipVisible}
@@ -383,6 +397,7 @@ const LargeDiv = () => {
                 options={options}
                 largeDivPos={largeDivPos}/>
         </div>
+        
       </div>
     </div> 
   )
