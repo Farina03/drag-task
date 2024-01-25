@@ -24,7 +24,7 @@ const LargeDiv = () => {
   const [cursor, setCursor] = useState("")
   const largeDivRef = useRef(null)
   const smallDivRef = useRef(null)
-
+  const initialTop = window.innerHeight/2-largeDivWidth
   const largeDivStyle = {
     left: largeDivPos.x,
     top: largeDivPos.y,
@@ -47,7 +47,7 @@ const LargeDiv = () => {
   }
   const optionsStyle = {
     marginLeft: window.innerWidth/2 - optionsWidth/2,
-    marginTop: "50px"
+    //marginTop: "50px"
   }
   function handleOptionChange(e) {
     setOptions(e.target.value)
@@ -110,30 +110,22 @@ const LargeDiv = () => {
       const boundX = largeDivRef.current.getBoundingClientRect().right
       const boundY = largeDivRef.current.getBoundingClientRect().bottom
       if(isResizing.direction === "left-top") {
-        // if((position.x+smallDivWidth <= largeDivDimensions.width) || 
-        //   (position.y+smallDivWidth <= largeDivDimensions.height)) {
-          setPosition({
-            x: Math.max(0,position.x-e.movementX),
-            y: Math.max(0,position.y-e.movementY)
-          })
-        // }
+        setLargeDivPos({
+          x: Math.min(boundX-smallDivWidth-1, largeDivPos.x+e.movementX),
+          y: Math.min(boundY-smallDivWidth-31-50, largeDivPos.y+e.movementY)
+        })
         setLargeDivDimensions(
           {
             width: Math.max(smallDivWidth, largeDivDimensions.width - e.movementX),
             height: Math.max(smallDivWidth, largeDivDimensions.height - e.movementY)
           }
         )
-        if((largeDivDimensions.width > smallDivWidth) ||
-            (largeDivDimensions.height > smallDivWidth)){
-          setLargeDivPos({
-            x: Math.min(boundX-smallDivWidth, largeDivPos.x+e.movementX),
-            y: Math.min(boundY-smallDivWidth, largeDivPos.y+e.movementY)
-          })
-        }
+        setPosition({
+          x: Math.max(0,position.x-e.movementX),
+          y: Math.max(0,position.y-e.movementY)
+        })
       }
       if(isResizing.direction === "right-top") {
-        const boundY = largeDivRef.current.getBoundingClientRect().bottom
-        const boundX = largeDivRef.current.getBoundingClientRect().left
         if(position.x+smallDivWidth >= largeDivDimensions.width) { 
           setPosition(prevItem => (
             {
@@ -148,14 +140,12 @@ const LargeDiv = () => {
             y: Math.max(0, prevItem.y-e.movementY)
           }
         ))
-        if(largeDivDimensions.width > smallDivWidth || 
-          largeDivDimensions.height > smallDivWidth){
-          setLargeDivPos(
+          setLargeDivPos(prevItem => (
             {
-              x: boundX,
-              y: Math.min(boundY-smallDivWidth, largeDivPos.y+e.movementY)
-          })
-        }
+              ...prevItem,
+              y: Math.min(boundY-smallDivWidth-1-30-50, prevItem.y+e.movementY)
+            }
+          ))
         setLargeDivDimensions(
           {
             width: Math.max(smallDivWidth, largeDivDimensions.width + e.movementX),
@@ -164,8 +154,6 @@ const LargeDiv = () => {
         )
       }
       if(isResizing.direction === "left-bottom") {
-        const boundX = largeDivRef.current.getBoundingClientRect().right
-        const boundXLeft = largeDivRef.current.getBoundingClientRect().left
         if(position.y+smallDivWidth >= largeDivDimensions.height) {
           setPosition(prevItem => (
           {
@@ -184,13 +172,11 @@ const LargeDiv = () => {
             height: Math.max(smallDivWidth, largeDivDimensions.height + e.movementY)
           }
         )
-        if(largeDivDimensions.width > smallDivWidth){
-          setLargeDivPos(prevItem => (
-            {
-              ...prevItem,
-              x: Math.min(boundX-smallDivWidth, prevItem.x+e.movementX)
-          }))
-        }
+        setLargeDivPos(prevItem => (
+          {
+            ...prevItem,
+            x: Math.min(boundX-smallDivWidth-1, prevItem.x+e.movementX)
+        }))
       }
       if(isResizing.direction === "right-bottom") {
         if((position.x+smallDivWidth >= largeDivDimensions.width) || 
@@ -208,98 +194,58 @@ const LargeDiv = () => {
         )
       }
       if(isResizing.direction === "left") {
-        const boundLeftX = largeDivRef.current.getBoundingClientRect().left
-        if(largeDivDimensions.width <= smallDivWidth) {        // && e.movementX <= 0) {
-          if(e.movementX <= 0) {
           setLargeDivPos(prevItem => {
             return {
               ...prevItem,
-              x: prevItem.x+e.movementX 
+                x: Math.min(boundX-smallDivWidth-1, largeDivPos.x+e.movementX)  
+            }
+          })
+          setLargeDivDimensions(prevItem => {
+            return {
+              ...prevItem,
+              width: Math.max(smallDivWidth, prevItem.width-e.movementX)  
             }
           })
           setPosition(prevItem => {   
             return {
               ...prevItem,
               x: Math.max(0, prevItem.x-e.movementX)
-            }
+            }    
           })
-          setLargeDivDimensions(prevItem => {
-            return {
-              ...prevItem,
-              width: prevItem.width-e.movementX
-            }
-          })
-          }
-        }
-        if(largeDivDimensions.width > smallDivWidth) {  
-          // console.log("Minimum", boundX-smallDivWidth)
-          // console.log("Minimum DETAILS", boundX, smallDivWidth)
-          // console.log("NormL", largeDivPos.x+e.movementX)  
-          // console.log("beforer", largeDivPos.x);
-          let sub = 0
-          if(e.movementX+smallDivWidth+largeDivPos.x > boundX) {
-            sub = e.movementX+smallDivWidth+largeDivPos.x-boundX
-          }
-          setLargeDivPos(prevItem => {
-            return {
-              ...prevItem,
-              x: Math.min(boundX-smallDivWidth, largeDivPos.x+e.movementX-sub)    //set position for large div
-            }
-          })
-          setLargeDivDimensions(prevItem => {
-            // console.log(e.movementX)
-            return {
-              ...prevItem,
-              width: Math.max(smallDivWidth, prevItem.width-e.movementX)  
-            }
-          })
-          // console.log("after", largeDivPos.x + largeDivDimensions.width - smallDivWidth, "zsdf", boundX);
-          setPosition(prevItem => {   
-            return {
-              ...prevItem,
-              x: Math.max(0, prevItem.x-e.movementX)}    //Math.max(0, prevItem.x-e.movementX)
-          })
-          
-        }
       }
       if(isResizing.direction === "right") {
-        console.log("right triggered")
-        const boundX = largeDivRef.current.getBoundingClientRect().right
-        if(position.x+smallDivWidth >= largeDivDimensions.width) {
-          setPosition(prevItem => ({
-            ...prevItem,
-            x: Math.max(0, Math.min(prevItem, prevItem.x+e.movementX))        //Math.max(0, Math.min(prevItem.x, prevItem.x+e.movementX))
-          }))
-        }
         setLargeDivDimensions(prevItem => (
           {
             ...prevItem,
             width: Math.max(smallDivWidth, prevItem.width + e.movementX)
           }
         ))
-      }
-      if(isResizing.direction === "top") {
-        const boundY = largeDivRef.current.getBoundingClientRect().bottom
-        // const boundTopY = largeDivRef.current.getBoundingClientRect().bottom
-        setPosition(prevItem => ({
-          ...prevItem,
-          y: Math.max(0, prevItem.y-e.movementY)
-        }))
-        if(largeDivDimensions.height > smallDivWidth) {
-          setLargeDivPos(prevItem => ({
+        if(position.x+smallDivWidth >= largeDivDimensions.width) {
+          setPosition(prevItem => ({
             ...prevItem,
-            y: Math.min(boundY-smallDivWidth, prevItem.y+e.movementY) 
+            x: Math.max(0, Math.min(prevItem.x, prevItem.x+e.movementX)),
           }))
         }
-        setLargeDivDimensions(prevItem => (
-          {
+      }
+      if(isResizing.direction === "top") {
+          setLargeDivPos(prevItem => ({
             ...prevItem,
-            height: Math.max(smallDivWidth, prevItem.height - e.movementY)
-          }
-        ))
+            y: Math.min(boundY-smallDivWidth-1-30-50, prevItem.y+e.movementY)    //calculate 30
+          }))
+          setLargeDivDimensions(prevItem => (
+            {
+              ...prevItem,
+              height: Math.max(smallDivWidth, prevItem.height - e.movementY)
+            }
+          ))
+          setPosition(prevItem => ({
+            ...prevItem,
+            y: Math.max(0, prevItem.y-e.movementY)
+          }))
       }
       if(isResizing.direction === "bottom") {
-        if(position.y+smallDivWidth >= largeDivDimensions.height) {
+        console.log(position.y, boundY)
+        if(position.y+smallDivWidth >= largeDivDimensions.height) {     //
           setPosition(prevItem => ({
             ...prevItem,
             y: Math.max(0, Math.min(prevItem.y,prevItem.y+e.movementY))    //max -> 0,prevItem.y+e.movementY
