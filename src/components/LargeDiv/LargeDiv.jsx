@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import SmallDiv from '../SmallDiv/SmallDiv'
 import './largediv.css'
 import { createPortal } from 'react-dom';
+import { cursorDeterminer } from '../../utils';
 // import '../SmallDiv/smalldiv.css'
 
 const LargeDiv = () => {
@@ -75,40 +76,46 @@ const LargeDiv = () => {
       const boundY = Math.max(0, Math.min(newY, maxY))  
       setPosition({ x: boundX, y: boundY });
     }
-    if(((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
-      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
-      ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
-      (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
-      ((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
-      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) ||
-      ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
-      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5))) {
-        setCursor("move")
-      }
-    else if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) || 
-      (e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
-      e.clientX <= largeDivRef.current.getBoundingClientRect().right+5)) {
-        setCursor("col-resize")
-    }
-    else if((e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().top+5) || 
-      (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
-      e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) {
-        setCursor("row-resize")
-    }
-    else setCursor("")
+    // if(((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+    //   (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
+    //   ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+    //   (e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().top+5)) ||
+    //   ((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) && 
+    //   (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) ||
+    //   ((e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().right+5) && 
+    //   (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5))) {
+    //     setCursor("move")
+    //   }
+    // else if((e.clientX >= largeDivRef.current.getBoundingClientRect().left-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().left+5) || 
+    //   (e.clientX >= largeDivRef.current.getBoundingClientRect().right-5 && 
+    //   e.clientX <= largeDivRef.current.getBoundingClientRect().right+5)) {
+    //     setCursor("col-resize")
+    // }
+    // else if((e.clientY >= largeDivRef.current.getBoundingClientRect().top-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().top+5) || 
+    //   (e.clientY >= largeDivRef.current.getBoundingClientRect().bottom-5 && 
+    //   e.clientY <= largeDivRef.current.getBoundingClientRect().bottom+5)) {
+    //     setCursor("row-resize")
+    // }
+    // else setCursor("")
+    const boundX = largeDivRef.current.getBoundingClientRect().right
+    const boundXLeft = largeDivRef.current.getBoundingClientRect().left
+    const boundY = largeDivRef.current.getBoundingClientRect().bottom
+    const boundYTop = largeDivRef.current.getBoundingClientRect().top
+    // const cursorDeterminer = cursorDeterminer(e, boundYTop, boundY, boundXLeft, boundX)
+    setCursor(cursorDeterminer(e, boundYTop, boundY, boundXLeft, boundX))
     if(isResizing.resize === true) {
-      const boundX = largeDivRef.current.getBoundingClientRect().right
-      const boundY = largeDivRef.current.getBoundingClientRect().bottom
+      //const boundX = largeDivRef.current.getBoundingClientRect().right
+      //const boundY = largeDivRef.current.getBoundingClientRect().bottom
       if(isResizing.direction === "left-top") {
         setLargeDivPos({
           x: Math.min(boundX-smallDivWidth-1, largeDivPos.x+e.movementX),
